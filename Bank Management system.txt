@@ -1,0 +1,170 @@
+import java.util.*;
+
+// Abstract Account Class
+abstract class Account {
+    protected String accountNumber;
+    protected String holderName;
+    protected double balance;
+
+    public Account(String accountNumber, String holderName, double balance) {
+        this.accountNumber = accountNumber;
+        this.holderName = holderName;
+        this.balance = balance;
+    }
+
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("Deposited: " + amount);
+        } else {
+            System.out.println("Invalid deposit amount!");
+        }
+    }
+
+    public abstract void withdraw(double amount); // abstract for different account rules
+
+    public void display() {
+        System.out.println("\n--- Account Details ---");
+        System.out.println("Account Number: " + accountNumber);
+        System.out.println("Holder Name: " + holderName);
+        System.out.println("Balance: " + balance);
+    }
+}
+
+// Savings Account (with minimum balance rule)
+class SavingsAccount extends Account {
+    private double minBalance = 500;
+
+    public SavingsAccount(String accNo, String name, double balance) {
+        super(accNo, name, balance);
+    }
+
+    @Override
+    public void withdraw(double amount) {
+        if (balance - amount >= minBalance) {
+            balance -= amount;
+            System.out.println("Withdrawn: " + amount);
+        } else {
+            System.out.println("Insufficient balance! Minimum balance must be " + minBalance);
+        }
+    }
+}
+
+// Current Account (with overdraft limit)
+class CurrentAccount extends Account {
+    private double overdraftLimit = 1000;
+
+    public CurrentAccount(String accNo, String name, double balance) {
+        super(accNo, name, balance);
+    }
+
+    @Override
+    public void withdraw(double amount) {
+        if (balance + overdraftLimit >= amount) {
+            balance -= amount;
+            System.out.println("Withdrawn: " + amount);
+        } else {
+            System.out.println("Overdraft limit exceeded!");
+        }
+    }
+}
+
+// Bank Class to Manage Accounts
+class Bank {
+    private Map<String, Account> accounts = new HashMap<>();
+
+    public void addAccount(Account account) {
+        accounts.put(account.accountNumber, account);
+        System.out.println("Account created successfully for " + account.holderName);
+    }
+
+    public void deposit(String accNo, double amount) {
+        Account acc = accounts.get(accNo);
+        if (acc != null) acc.deposit(amount);
+        else System.out.println("Account not found!");
+    }
+
+    public void withdraw(String accNo, double amount) {
+        Account acc = accounts.get(accNo);
+        if (acc != null) acc.withdraw(amount);
+        else System.out.println("Account not found!");
+    }
+
+    public void showAccount(String accNo) {
+        Account acc = accounts.get(accNo);
+        if (acc != null) acc.display();
+        else System.out.println("Account not found!");
+    }
+}
+
+// Main Class
+public class BankManagementSystem {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Bank bank = new Bank();
+
+        while (true) {
+            System.out.println("\n===== BANK MANAGEMENT SYSTEM =====");
+            System.out.println("1. Create Savings Account");
+            System.out.println("2. Create Current Account");
+            System.out.println("3. Deposit");
+            System.out.println("4. Withdraw");
+            System.out.println("5. Show Account");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Account Number: ");
+                    String accNo1 = sc.next();
+                    System.out.print("Enter Holder Name: ");
+                    String name1 = sc.next();
+                    System.out.print("Enter Initial Balance: ");
+                    double bal1 = sc.nextDouble();
+                    bank.addAccount(new SavingsAccount(accNo1, name1, bal1));
+                    break;
+
+                case 2:
+                    System.out.print("Enter Account Number: ");
+                    String accNo2 = sc.next();
+                    System.out.print("Enter Holder Name: ");
+                    String name2 = sc.next();
+                    System.out.print("Enter Initial Balance: ");
+                    double bal2 = sc.nextDouble();
+                    bank.addAccount(new CurrentAccount(accNo2, name2, bal2));
+                    break;
+
+                case 3:
+                    System.out.print("Enter Account Number: ");
+                    String accD = sc.next();
+                    System.out.print("Enter Deposit Amount: ");
+                    double amtD = sc.nextDouble();
+                    bank.deposit(accD, amtD);
+                    break;
+
+                case 4:
+                    System.out.print("Enter Account Number: ");
+                    String accW = sc.next();
+                    System.out.print("Enter Withdraw Amount: ");
+                    double amtW = sc.nextDouble();
+                    bank.withdraw(accW, amtW);
+                    break;
+
+                case 5:
+                    System.out.print("Enter Account Number: ");
+                    String accS = sc.next();
+                    bank.showAccount(accS);
+                    break;
+
+                case 6:
+                    System.out.println("Exiting... Thank you for using our Bank System!");
+                    sc.close();
+                    return;
+
+                default:
+                    System.out.println("Invalid choice! Try again.");
+            }
+        }
+    }
+}
